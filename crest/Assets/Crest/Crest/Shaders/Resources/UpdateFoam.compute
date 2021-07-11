@@ -88,12 +88,12 @@ void UpdateFoam(uint3 id : SV_DispatchThreadID)
 	const float2x2 jacobian = (float4(disp_x.xz, disp_z.xz) - disp.xzxz) / cascadeData._texelWidth;
 	// Determinant is < 1 for pinched, < 0 for overlap/inversion
 	const float det = determinant( jacobian );
-	foam += 5.0 * _SimDeltaTime * _WaveFoamStrength * saturate( _WaveFoamCoverage - det + foamBase * 0.7 );
+	foam += 5.0 * _SimDeltaTime * _WaveFoamStrength * saturate( _WaveFoamCoverage - det + foamBase * 0.7 ) * 0.1;
 
 	// Add foam in shallow water. use the displaced position to ensure we add foam where world objects are.
 	const float3 uv_slice_displaced = WorldToUV(worldPosXZ + disp.xz, cascadeData, sliceIndex);
 	float signedOceanDepth = SampleLodLevel(_LD_TexArray_SeaFloorDepth, uv_slice_displaced, 0.0).x + disp.y;
-	foam += _ShorelineFoamStrength * _SimDeltaTime * saturate(1.0 - signedOceanDepth / _ShorelineFoamMaxDepth);
+	foam += _ShorelineFoamStrength * _SimDeltaTime * saturate(1.0 - signedOceanDepth / _ShorelineFoamMaxDepth) * 0.1;
 
 	_LD_TexArray_Target[id] = saturate(foam);
 }

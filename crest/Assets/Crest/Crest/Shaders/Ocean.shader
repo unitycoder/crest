@@ -426,7 +426,7 @@ Shader "Crest/Ocean"
 				}
 
 				// Foam can saturate
-				o.foam_screenPosXYW.x = saturate(o.foam_screenPosXYW.x);
+				o.foam_screenPosXYW.x = saturate(o.foam_screenPosXYW.x * 10);
 
 				// debug tinting to see which shape textures are used
 				#if _DEBUGVISUALISESHAPESAMPLE_ON
