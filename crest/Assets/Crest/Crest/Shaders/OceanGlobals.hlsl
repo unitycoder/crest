@@ -20,6 +20,7 @@ float _MeshScaleLerp;
 float _CrestClipByDefault;
 float _CrestLodAlphaBlackPointFade;
 float _CrestLodAlphaBlackPointWhitePointFade;
+float _CrestFoamLifetimeScale;
 
 float3 _PrimaryLightDirection;
 float3 _PrimaryLightIntensity;

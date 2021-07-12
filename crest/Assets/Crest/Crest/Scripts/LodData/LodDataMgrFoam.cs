@@ -29,10 +29,14 @@ namespace Crest
         internal const string ERROR_MATERIAL_KEYWORD_ON_FEATURE_OFF_FIX = "If this is not intentional, either enable the <i>Create Foam Sim</i> option on this component to turn it on, or disable the <i>Foam</i> feature on the ocean material to save performance.";
 
         readonly int sp_FoamFadeRate = Shader.PropertyToID("_FoamFadeRate");
+        readonly int sp_FoamLifetimeScale = Shader.PropertyToID("_FoamLifetimeScale");
         readonly int sp_WaveFoamStrength = Shader.PropertyToID("_WaveFoamStrength");
         readonly int sp_WaveFoamCoverage = Shader.PropertyToID("_WaveFoamCoverage");
         readonly int sp_ShorelineFoamMaxDepth = Shader.PropertyToID("_ShorelineFoamMaxDepth");
         readonly int sp_ShorelineFoamStrength = Shader.PropertyToID("_ShorelineFoamStrength");
+
+        // Global
+        readonly int sp_CrestFoamLifetimeScale = Shader.PropertyToID("_CrestFoamLifetimeScale");
 
         SettingsType _defaultSettings;
         public SettingsType Settings
@@ -69,11 +73,20 @@ namespace Crest
 #endif
         }
 
+        internal override void OnEnable()
+        {
+            base.OnEnable();
+
+            // We do not want to change this at runtime.
+            Shader.SetGlobalFloat(sp_CrestFoamLifetimeScale, Settings._foamLifetimeScale);
+        }
+
         protected override void SetAdditionalSimParams(IPropertyWrapper simMaterial)
         {
             base.SetAdditionalSimParams(simMaterial);
 
             simMaterial.SetFloat(sp_FoamFadeRate, Settings._foamFadeRate);
+            simMaterial.SetFloat(sp_FoamLifetimeScale, 1f / Settings._foamLifetimeScale);
             simMaterial.SetFloat(sp_WaveFoamStrength, Settings._waveFoamStrength);
             simMaterial.SetFloat(sp_WaveFoamCoverage, Settings._waveFoamCoverage);
             simMaterial.SetFloat(sp_ShorelineFoamMaxDepth, Settings._shorelineFoamMaxDepth);
