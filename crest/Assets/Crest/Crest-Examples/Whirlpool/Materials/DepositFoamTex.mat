@@ -26,6 +26,6 @@ Material:
     m_Floats:
     - _Amplitude: 20
     - _Radius: 19.97
-    - _Strength: 100
+    - _Strength: 10
     m_Colors: []
   m_BuildTextureStacks: []
