@@ -102,6 +102,12 @@ namespace Crest
             _targets.RunLambda(buffer => TextureArrayHelpers.ClearToBlack(buffer));
         }
 
+        public override void ClearLodData()
+        {
+            base.ClearLodData();
+            _targets.RunLambda(buffer => TextureArrayHelpers.ClearToBlack(buffer));
+        }
+
         bool StartInitLight()
         {
             _mainLight = OceanRenderer.Instance._primaryLight;
