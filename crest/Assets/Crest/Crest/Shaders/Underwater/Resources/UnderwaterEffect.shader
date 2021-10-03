@@ -89,7 +89,7 @@ Shader "Hidden/Crest/Underwater/Underwater Effect"
 		return DebugRenderOceanMask(isOceanSurface, isUnderwater, mask, sceneColour);
 #endif
 
-		if (isUnderwater)
+		if (isUnderwater && !isOceanSurface)
 		{
 			// Position needs to be reconstructed in the fragment shader to avoid precision issues as per
 			// Unity's lead. Fixes caustics stuttering when far from zero.

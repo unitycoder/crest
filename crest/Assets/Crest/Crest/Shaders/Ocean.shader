@@ -602,11 +602,25 @@ Shader "Crest/Ocean"
 				#endif // _FLOW_ON
 				#endif // _FOAM_ON
 
+				half shadowScatter = shadow.x;
+#if _SHADOWS_ON
+				if (underwater)
+				{
+					int sliceIndex = clamp(_CrestDataSliceOffset, 0, _SliceCount - 2);
+					const float3 uv_slice = WorldToUV(_WorldSpaceCameraPos.xz, _CrestCascadeData[sliceIndex], sliceIndex);
+					// Camera should be at center of LOD system so no need for blending (alpha, weights, etc). This might not be
+					// the case if there is large horizontal displacement, but the _DataSliceOffset should help by setting a
+					// large enough slice as minimum.
+					shadowScatter = _LD_TexArray_Shadow.SampleLevel(LODData_linear_clamp_sampler, uv_slice, 0.0).x;
+					shadowScatter = saturate(1.0 - shadowScatter);
+				}
+#endif // _SHADOWS_ON
+
 				// Compute color of ocean - in-scattered light + refracted scene
 				half3 scatterCol = ScatterColour
 				(
 					input.lodAlpha_worldXZUndisplaced_oceanDepth.w,
-					shadow.x,
+					shadowScatter,
 					sss,
 					view,
 					AmbientLight(),
@@ -669,13 +683,13 @@ Shader "Crest/Ocean"
 					// Above water - do atmospheric fog. If you are using a third party sky package such as Azure, replace this with their stuff!
 					UNITY_APPLY_FOG(input.fogCoord, col);
 				}
-#if _OLD_UNDERWATER
+// #if _OLD_UNDERWATER
 				else
 				{
 					// underwater - do depth fog
 					col = lerp(col, scatterCol, saturate(1. - exp(-_DepthFogDensity.xyz * pixelZ)));
 				}
-#endif
+// #endif
 
 				#if _DEBUGVISUALISESHAPESAMPLE_ON
 				col = lerp(col.rgb, input.debugtint, 0.5);

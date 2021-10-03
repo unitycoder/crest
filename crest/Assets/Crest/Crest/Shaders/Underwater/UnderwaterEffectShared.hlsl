@@ -5,7 +5,7 @@
 #ifndef CREST_UNDERWATER_EFFECT_SHARED_INCLUDED
 #define CREST_UNDERWATER_EFFECT_SHARED_INCLUDED
 
-half3 _AmbientLighting;
+half3 _CrestAmbientLighting;
 half _DataSliceOffset;
 float2 _HorizonNormal;
 
@@ -119,7 +119,7 @@ half3 ApplyUnderwaterEffect
 				shadow,
 				1.0, // SSS is not used for underwater yet. Calculated in SampleDisplacementsNormals which is costly.
 				view,
-				_AmbientLighting,
+				_CrestAmbientLighting,
 				lightDir,
 				lightCol,
 				true

@@ -925,6 +925,8 @@ namespace Crest
 
             WritePerFrameMaterialParams();
 
+            LateUpdateGlobalMaterialProperties();
+
 #if UNITY_EDITOR
             if (EditorApplication.isPlaying || !_showOceanProxyPlane)
 #endif
@@ -955,6 +957,38 @@ namespace Crest
             {
                 CollisionProvider?.UpdateQueries();
                 FlowProvider?.UpdateQueries();
+            }
+        }
+
+        void LateUpdateGlobalMaterialProperties()
+        {
+            Shader.SetGlobalVector("_CrestDepthFogDensity", OceanMaterial.GetVector("_DepthFogDensity"));
+            // We'll have the wrong color values if we do not use linear:
+            // https://forum.unity.com/threads/fragment-shader-output-colour-has-incorrect-values-when-hardcoded.377657/
+            Shader.SetGlobalColor("_CrestDiffuse", OceanMaterial.GetColor("_Diffuse").linear);
+            Shader.SetGlobalColor("_CrestDiffuseGrazing", OceanMaterial.GetColor("_DiffuseGrazing").linear);
+            Shader.SetGlobalColor("_CrestDiffuseShadow", OceanMaterial.GetColor("_DiffuseShadow").linear);
+            Shader.SetGlobalColor("_CrestSubSurfaceColour", OceanMaterial.GetColor("_SubSurfaceColour").linear);
+            Shader.SetGlobalFloat("_CrestSubSurfaceSun", OceanMaterial.GetFloat("_SubSurfaceSun"));
+            Shader.SetGlobalFloat("_CrestSubSurfaceBase", OceanMaterial.GetFloat("_SubSurfaceBase"));
+            Shader.SetGlobalFloat("_CrestSubSurfaceSunFallOff", OceanMaterial.GetFloat("_SubSurfaceSunFallOff"));
+
+            if (OceanMaterial.IsKeywordEnabled("_SUBSURFACESCATTERING_ON"))
+            {
+                Shader.EnableKeyword("CREST_SUBSURFACESCATTERING_ON");
+            }
+            else
+            {
+                Shader.DisableKeyword("CREST_SUBSURFACESCATTERING_ON");
+            }
+
+            if (OceanMaterial.IsKeywordEnabled("_SHADOWS_ON"))
+            {
+                Shader.EnableKeyword("CREST_SHADOWS_ON");
+            }
+            else
+            {
+                Shader.DisableKeyword("CREST_SHADOWS_ON");
             }
         }
 

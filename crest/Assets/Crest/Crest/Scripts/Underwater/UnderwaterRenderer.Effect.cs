@@ -17,8 +17,9 @@ namespace Crest
         internal static readonly int sp_CrestCameraColorTexture = Shader.PropertyToID("_CrestCameraColorTexture");
         static readonly int sp_InvViewProjection = Shader.PropertyToID("_InvViewProjection");
         static readonly int sp_InvViewProjectionRight = Shader.PropertyToID("_InvViewProjectionRight");
-        static readonly int sp_AmbientLighting = Shader.PropertyToID("_AmbientLighting");
+        static readonly int sp_CrestAmbientLighting = Shader.PropertyToID("_CrestAmbientLighting");
         static readonly int sp_HorizonNormal = Shader.PropertyToID("_HorizonNormal");
+        static readonly int sp_CrestDataSliceOffset = Shader.PropertyToID("_CrestDataSliceOffset");
         static readonly int sp_DataSliceOffset = Shader.PropertyToID("_DataSliceOffset");
 
         CommandBuffer _underwaterEffectCommandBuffer;
@@ -68,7 +69,6 @@ namespace Crest
             UpdatePostProcessMaterial(
                 _camera,
                 _underwaterEffectMaterial,
-                _sphericalHarmonicsData,
                 _meniscus,
                 _firstRender || _copyOceanMaterialParamsEachFrame,
                 _debug._viewOceanMask,
@@ -102,10 +102,31 @@ namespace Crest
             CleanUpMaskTextures(_underwaterEffectCommandBuffer);
         }
 
+        static void UpdateGlobalShaderData(UnderwaterSphericalHarmonicsData sphericalHarmonicsData, int dataSliceOffset)
+        {
+            // Compute ambient lighting SH.
+            {
+                // We could pass in a renderer which would prime this lookup. However it doesnt make sense to use an existing render
+                // at different position, as this would then thrash it and negate the priming functionality. We could create a dummy invis GO
+                // with a dummy Renderer which might be enough, but this is hacky enough that we'll wait for it to become a problem
+                // rather than add a pre-emptive hack.
+
+                UnityEngine.Profiling.Profiler.BeginSample("Underwater sample spherical harmonics");
+
+                LightProbes.GetInterpolatedProbe(OceanRenderer.Instance.ViewCamera.transform.position, null, out var sphericalHarmonicsL2);
+                sphericalHarmonicsL2.Evaluate(sphericalHarmonicsData._shDirections, sphericalHarmonicsData._ambientLighting);
+                Shader.SetGlobalVector(sp_CrestAmbientLighting, sphericalHarmonicsData._ambientLighting[0]);
+
+                UnityEngine.Profiling.Profiler.EndSample();
+            }
+
+            // We sample shadows at the camera position. Pass a user defined slice for smoothing out detail.
+            Shader.SetGlobalInt(sp_CrestDataSliceOffset, dataSliceOffset);
+        }
+
         internal static void UpdatePostProcessMaterial(
             Camera camera,
             PropertyWrapperMaterial underwaterPostProcessMaterialWrapper,
-            UnderwaterSphericalHarmonicsData sphericalHarmonicsData,
             bool isMeniscusEnabled,
             bool copyParamsFromOceanMaterial,
             bool debugViewPostProcessMask,
@@ -200,22 +221,6 @@ namespace Crest
                 );
 
                 underwaterPostProcessMaterial.SetVector(sp_HorizonNormal, projectedNormal);
-            }
-
-            // Compute ambient lighting SH
-            {
-                // We could pass in a renderer which would prime this lookup. However it doesnt make sense to use an existing render
-                // at different position, as this would then thrash it and negate the priming functionality. We could create a dummy invis GO
-                // with a dummy Renderer which might be enoguh, but this is hacky enough that we'll wait for it to become a problem
-                // rather than add a pre-emptive hack.
-
-                UnityEngine.Profiling.Profiler.BeginSample("Underwater sample spherical harmonics");
-
-                LightProbes.GetInterpolatedProbe(OceanRenderer.Instance.ViewCamera.transform.position, null, out var sphericalHarmonicsL2);
-                sphericalHarmonicsL2.Evaluate(sphericalHarmonicsData._shDirections, sphericalHarmonicsData._ambientLighting);
-                underwaterPostProcessMaterial.SetVector(sp_AmbientLighting, sphericalHarmonicsData._ambientLighting[0]);
-
-                UnityEngine.Profiling.Profiler.EndSample();
             }
         }
     }
