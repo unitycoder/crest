@@ -19,6 +19,10 @@ Changed
 
    -  Added new CPU-based collision provider - *Baked FFT Data*.
 
+   .. only:: birp or urp
+
+      -  Ramp planar reflection distortion with distance. `[BIRP] [URP]`
+
 Fixed
 ^^^^^
 .. bullet_list::
