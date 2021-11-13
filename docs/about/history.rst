@@ -18,6 +18,7 @@ Changed
 .. bullet_list::
 
    -  Added new CPU-based collision provider - *Baked FFT Data*.
+   -  Water Body adds an inclusion to clipping (ie unclips) if *Default Clipping State* is *Everything Clipped*.
 
 Fixed
 ^^^^^
