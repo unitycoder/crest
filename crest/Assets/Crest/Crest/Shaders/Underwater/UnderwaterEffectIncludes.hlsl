@@ -5,11 +5,6 @@
 #ifndef CREST_UNDERWATER_EFFECT_INCLUDES_INCLUDED
 #define CREST_UNDERWATER_EFFECT_INCLUDES_INCLUDED
 
-// How to handle keywords?
-// - multi_compile will create a new variant which might not be acceptable.
-// - shader_feature would require a property on their material.
-// - could not use
-
 // For this to work with a surface shader, adhere to the following:
 // - wrap anything the compiler complains about with "#ifndef SHADER_TARGET_SURFACE_ANALYSIS".
 // - const is not supported and wrapping is too much trouble.
