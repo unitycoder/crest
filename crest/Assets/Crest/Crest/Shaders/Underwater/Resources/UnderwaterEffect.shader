@@ -22,6 +22,8 @@ Shader "Hidden/Crest/Underwater/Underwater Effect"
 	#pragma multi_compile_local __ _FULL_SCREEN_EFFECT
 	#pragma multi_compile_local __ _DEBUG_VIEW_OCEAN_MASK
 
+	#pragma multi_compile _ CREST_UNDERWATER_BEFORE_TRANSPARENT
+
 	#include "UnityCG.cginc"
 	#include "Lighting.cginc"
 
@@ -89,7 +91,11 @@ Shader "Hidden/Crest/Underwater/Underwater Effect"
 		return DebugRenderOceanMask(isOceanSurface, isUnderwater, mask, sceneColour);
 #endif
 
+#if CREST_UNDERWATER_BEFORE_TRANSPARENT
 		if (isUnderwater && !isOceanSurface)
+#else
+		if (isUnderwater)
+#endif
 		{
 			// Position needs to be reconstructed in the fragment shader to avoid precision issues as per
 			// Unity's lead. Fixes caustics stuttering when far from zero.

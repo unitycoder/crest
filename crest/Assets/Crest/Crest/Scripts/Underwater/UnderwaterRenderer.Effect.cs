@@ -50,12 +50,6 @@ namespace Crest
 
         void OnPreRenderUnderwaterEffect()
         {
-            // Ensure legacy underwater fog is disabled.
-            if (_firstRender)
-            {
-                OceanRenderer.Instance.OceanMaterial.DisableKeyword("_OLD_UNDERWATER");
-            }
-
             RenderTextureDescriptor descriptor = XRHelpers.GetRenderTextureDescriptor(_camera);
             descriptor.useDynamicScale = _camera.allowDynamicResolution;
             // Format must be correct for CopyTexture to work. Hopefully this is good enough.
@@ -100,28 +94,6 @@ namespace Crest
             RenderTexture.ReleaseTemporary(temporaryColorBuffer);
             // We no longer need the temporary mask textures so release them.
             CleanUpMaskTextures(_underwaterEffectCommandBuffer);
-        }
-
-        static void UpdateGlobalShaderData(UnderwaterSphericalHarmonicsData sphericalHarmonicsData, int dataSliceOffset)
-        {
-            // Compute ambient lighting SH.
-            {
-                // We could pass in a renderer which would prime this lookup. However it doesnt make sense to use an existing render
-                // at different position, as this would then thrash it and negate the priming functionality. We could create a dummy invis GO
-                // with a dummy Renderer which might be enough, but this is hacky enough that we'll wait for it to become a problem
-                // rather than add a pre-emptive hack.
-
-                UnityEngine.Profiling.Profiler.BeginSample("Underwater sample spherical harmonics");
-
-                LightProbes.GetInterpolatedProbe(OceanRenderer.Instance.ViewCamera.transform.position, null, out var sphericalHarmonicsL2);
-                sphericalHarmonicsL2.Evaluate(sphericalHarmonicsData._shDirections, sphericalHarmonicsData._ambientLighting);
-                Shader.SetGlobalVector(sp_CrestAmbientLighting, sphericalHarmonicsData._ambientLighting[0]);
-
-                UnityEngine.Profiling.Profiler.EndSample();
-            }
-
-            // We sample shadows at the camera position. Pass a user defined slice for smoothing out detail.
-            Shader.SetGlobalInt(sp_CrestDataSliceOffset, dataSliceOffset);
         }
 
         internal static void UpdatePostProcessMaterial(

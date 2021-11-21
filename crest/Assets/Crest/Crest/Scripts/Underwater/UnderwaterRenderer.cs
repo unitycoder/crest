@@ -50,6 +50,10 @@ namespace Crest
         [Header("Advanced")]
 
         [SerializeField]
+        [Tooltip("Renders the underwater effect before the transparent pass (instead of after). So one can apply the underwater fog themselves to transparent objects. Cannot be changed at runtime.")]
+        bool _enableShaderAPI = false;
+
+        [SerializeField]
         [Tooltip("Copying params each frame ensures underwater appearance stays consistent with ocean material params. Has a small overhead so should be disabled if not needed.")]
         internal bool _copyOceanMaterialParamsEachFrame = true;
 
@@ -140,18 +144,60 @@ namespace Crest
             SetupOceanMask();
             SetupUnderwaterEffect();
             _camera.AddCommandBuffer(CameraEvent.BeforeForwardAlpha, _oceanMaskCommandBuffer);
-            _camera.AddCommandBuffer(CameraEvent.BeforeForwardAlpha, _underwaterEffectCommandBuffer);
+            _camera.AddCommandBuffer(_enableShaderAPI ? CameraEvent.BeforeForwardAlpha : CameraEvent.AfterForwardAlpha, _underwaterEffectCommandBuffer);
         }
 
         void Disable()
         {
             _camera.RemoveCommandBuffer(CameraEvent.BeforeForwardAlpha, _oceanMaskCommandBuffer);
+            // It could be either event registered at this point. Remove from both for safety.
             _camera.RemoveCommandBuffer(CameraEvent.BeforeForwardAlpha, _underwaterEffectCommandBuffer);
+            _camera.RemoveCommandBuffer(CameraEvent.AfterForwardAlpha, _underwaterEffectCommandBuffer);
         }
 
         void LateUpdate()
         {
-            UpdateGlobalShaderData(_sphericalHarmonicsData, _filterOceanData);
+            // Compute ambient lighting SH.
+            {
+                // We could pass in a renderer which would prime this lookup. However it doesnt make sense to use an existing render
+                // at different position, as this would then thrash it and negate the priming functionality. We could create a dummy invis GO
+                // with a dummy Renderer which might be enough, but this is hacky enough that we'll wait for it to become a problem
+                // rather than add a pre-emptive hack.
+
+                UnityEngine.Profiling.Profiler.BeginSample("Underwater sample spherical harmonics");
+
+                LightProbes.GetInterpolatedProbe(OceanRenderer.Instance.ViewCamera.transform.position, null, out var sphericalHarmonicsL2);
+                sphericalHarmonicsL2.Evaluate(_sphericalHarmonicsData._shDirections, _sphericalHarmonicsData._ambientLighting);
+                Shader.SetGlobalVector(sp_CrestAmbientLighting, _sphericalHarmonicsData._ambientLighting[0]);
+
+                UnityEngine.Profiling.Profiler.EndSample();
+            }
+
+            // We sample shadows at the camera position. Pass a user defined slice offset for smoothing out detail.
+            Shader.SetGlobalInt(sp_CrestDataSliceOffset, _filterOceanData);
+
+            // Set global shader data for those wanting to render underwater fog on transparent objects.
+            if (_enableShaderAPI)
+            {
+                var oceanMaterial = OceanRenderer.Instance.OceanMaterial;
+
+                Shader.SetGlobalVector("_CrestDepthFogDensity", oceanMaterial.GetVector("_DepthFogDensity"));
+                // We'll have the wrong color values if we do not use linear:
+                // https://forum.unity.com/threads/fragment-shader-output-colour-has-incorrect-values-when-hardcoded.377657/
+                Shader.SetGlobalColor("_CrestDiffuse", oceanMaterial.GetColor("_Diffuse").linear);
+                Shader.SetGlobalColor("_CrestDiffuseGrazing", oceanMaterial.GetColor("_DiffuseGrazing").linear);
+                Shader.SetGlobalColor("_CrestDiffuseShadow", oceanMaterial.GetColor("_DiffuseShadow").linear);
+                Shader.SetGlobalColor("_CrestSubSurfaceColour", oceanMaterial.GetColor("_SubSurfaceColour").linear);
+                Shader.SetGlobalFloat("_CrestSubSurfaceSun", oceanMaterial.GetFloat("_SubSurfaceSun"));
+                Shader.SetGlobalFloat("_CrestSubSurfaceBase", oceanMaterial.GetFloat("_SubSurfaceBase"));
+                Shader.SetGlobalFloat("_CrestSubSurfaceSunFallOff", oceanMaterial.GetFloat("_SubSurfaceSunFallOff"));
+
+                Helpers.ShaderSetGlobalKeyword("CREST_SUBSURFACESCATTERING_ON", oceanMaterial.IsKeywordEnabled("_SUBSURFACESCATTERING_ON"));
+                Helpers.ShaderSetGlobalKeyword("CREST_SHADOWS_ON", oceanMaterial.IsKeywordEnabled("_SHADOWS_ON"));
+
+            }
+
+            Helpers.ShaderSetGlobalKeyword("CREST_UNDERWATER_BEFORE_TRANSPARENT", _enableShaderAPI);
         }
 
         void OnPreRender()

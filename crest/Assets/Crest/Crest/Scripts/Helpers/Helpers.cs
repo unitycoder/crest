@@ -23,6 +23,18 @@ namespace Crest
             return false;
         }
 
+        public static void ShaderSetGlobalKeyword(string keyword, bool enabled)
+        {
+            if (enabled)
+            {
+                Shader.EnableKeyword(keyword);
+            }
+            else
+            {
+                Shader.DisableKeyword(keyword);
+            }
+        }
+
         public static bool IsIntelGPU()
         {
             // Works for Windows and MacOS. Grabbed from Unity Graphics repository:

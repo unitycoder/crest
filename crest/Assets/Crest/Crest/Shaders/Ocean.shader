@@ -255,7 +255,7 @@ Shader "Crest/Ocean"
 			#pragma shader_feature_local _DEBUGVISUALISEFLOW_ON
 			#pragma shader_feature_local _DEBUGDISABLESMOOTHLOD_ON
 
-			#pragma multi_compile_local _ _OLD_UNDERWATER
+			#pragma multi_compile _ CREST_UNDERWATER_BEFORE_TRANSPARENT
 
 			#include "UnityCG.cginc"
 			#include "Lighting.cginc"
@@ -683,13 +683,13 @@ Shader "Crest/Ocean"
 					// Above water - do atmospheric fog. If you are using a third party sky package such as Azure, replace this with their stuff!
 					UNITY_APPLY_FOG(input.fogCoord, col);
 				}
-// #if _OLD_UNDERWATER
+#if CREST_UNDERWATER_BEFORE_TRANSPARENT
 				else
 				{
 					// underwater - do depth fog
 					col = lerp(col, scatterCol, saturate(1. - exp(-_DepthFogDensity.xyz * pixelZ)));
 				}
-// #endif
+#endif
 
 				#if _DEBUGVISUALISESHAPESAMPLE_ON
 				col = lerp(col.rgb, input.debugtint, 0.5);
