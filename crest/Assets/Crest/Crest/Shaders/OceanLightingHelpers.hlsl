@@ -6,7 +6,7 @@
 #define CREST_OCEAN_LIGHTING_HELPERS_H
 
 #if defined(LIGHTING_INCLUDED)
-float3 WorldSpaceLightDir(float3 worldPos)
+float3 CrestWorldSpaceLightDir(float3 worldPos)
 {
 	float3 lightDir = _WorldSpaceLightPos0.xyz;
 	if (_WorldSpaceLightPos0.w > 0.)

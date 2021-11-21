@@ -497,7 +497,7 @@ Shader "Crest/Ocean"
 				float rawDepth = CREST_SAMPLE_SCENE_DEPTH_X(uvDepth);
 				float sceneZ = CrestLinearEyeDepth(rawDepth);
 
-				float3 lightDir = WorldSpaceLightDir(input.worldPos);
+				float3 lightDir = CrestWorldSpaceLightDir(input.worldPos);
 				half3 lightCol = _LightColor0;
 				// Soft shadow, hard shadow
 				fixed2 shadow = (fixed2)1.0
