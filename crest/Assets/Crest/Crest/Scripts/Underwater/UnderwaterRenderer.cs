@@ -261,7 +261,15 @@ namespace Crest
         {
             var isValid = true;
 
-            // Intentionally left empty. Here for downstream.
+            if (ocean != null && ocean.OceanMaterial != null && _enableShaderAPI && ocean.OceanMaterial.IsKeywordEnabled("_SUBSURFACESHALLOWCOLOUR_ON"))
+            {
+                showMessage
+                (
+                    "<i>Enable Shader API</i> does not support the <i>Scatter Colour Shallow</i> option",
+                    $"Disable <i>Scatter Colour Shallow</i> on the ocean material <i>{ocean.OceanMaterial.name}</i>.",
+                    ValidatedHelper.MessageType.Error, ocean.OceanMaterial
+                );
+            }
 
             return isValid;
         }
