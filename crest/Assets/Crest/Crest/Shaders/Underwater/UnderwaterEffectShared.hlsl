@@ -5,8 +5,6 @@
 #ifndef CREST_UNDERWATER_EFFECT_SHARED_INCLUDED
 #define CREST_UNDERWATER_EFFECT_SHARED_INCLUDED
 
-half3 _CrestAmbientLighting;
-half _DataSliceOffset;
 float2 _HorizonNormal;
 
 float4 DebugRenderOceanMask(const bool isOceanSurface, const bool isUnderwater, const float mask, const float3 sceneColour)
@@ -83,7 +81,7 @@ half3 ApplyUnderwaterEffect
 )
 {
 	half3 scatterCol = 0.0;
-	int sliceIndex = clamp(_DataSliceOffset, 0, _SliceCount - 2);
+	int sliceIndex = clamp(_CrestDataSliceOffset, 0, _SliceCount - 2);
 	{
 		// Offset slice so that we dont get high freq detail. But never use last lod as this has crossfading.
 		const float3 uv_slice = WorldToUV(_WorldSpaceCameraPos.xz, _CrestCascadeData[sliceIndex], sliceIndex);
@@ -92,7 +90,7 @@ half3 ApplyUnderwaterEffect
 #if _SHADOWS_ON
 		{
 			// Camera should be at center of LOD system so no need for blending (alpha, weights, etc). This might not be
-			// the case if there is large horizontal displacement, but the _DataSliceOffset should help by setting a
+			// the case if there is large horizontal displacement, but the _CrestDataSliceOffset should help by setting a
 			// large enough slice as minimum.
 			shadow = _LD_TexArray_Shadow.SampleLevel(LODData_linear_clamp_sampler, uv_slice, 0.0).x;
 			shadow = saturate(1.0 - shadow);

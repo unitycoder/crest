@@ -83,6 +83,9 @@ namespace Crest
         // XR MP will create two instances of this class so it needs to be static to track the pass/eye.
         internal static int s_xrPassIndex = -1;
 
+        static readonly int sp_CrestAmbientLighting = Shader.PropertyToID("_CrestAmbientLighting");
+        static readonly int sp_CrestDataSliceOffset = Shader.PropertyToID("_CrestDataSliceOffset");
+
         // Use instance to denote whether this is active or not. Only one camera is supported.
         public static UnderwaterRenderer Instance { get; private set; }
 
@@ -163,13 +166,10 @@ namespace Crest
                 // at different position, as this would then thrash it and negate the priming functionality. We could create a dummy invis GO
                 // with a dummy Renderer which might be enough, but this is hacky enough that we'll wait for it to become a problem
                 // rather than add a pre-emptive hack.
-
-                UnityEngine.Profiling.Profiler.BeginSample("Underwater sample spherical harmonics");
-
+                UnityEngine.Profiling.Profiler.BeginSample("Underwater Sample Spherical Harmonics");
                 LightProbes.GetInterpolatedProbe(OceanRenderer.Instance.ViewCamera.transform.position, null, out var sphericalHarmonicsL2);
                 sphericalHarmonicsL2.Evaluate(_sphericalHarmonicsData._shDirections, _sphericalHarmonicsData._ambientLighting);
                 Shader.SetGlobalVector(sp_CrestAmbientLighting, _sphericalHarmonicsData._ambientLighting[0]);
-
                 UnityEngine.Profiling.Profiler.EndSample();
             }
 

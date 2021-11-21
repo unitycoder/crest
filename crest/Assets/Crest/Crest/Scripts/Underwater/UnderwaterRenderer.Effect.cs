@@ -17,10 +17,7 @@ namespace Crest
         internal static readonly int sp_CrestCameraColorTexture = Shader.PropertyToID("_CrestCameraColorTexture");
         static readonly int sp_InvViewProjection = Shader.PropertyToID("_InvViewProjection");
         static readonly int sp_InvViewProjectionRight = Shader.PropertyToID("_InvViewProjectionRight");
-        static readonly int sp_CrestAmbientLighting = Shader.PropertyToID("_CrestAmbientLighting");
         static readonly int sp_HorizonNormal = Shader.PropertyToID("_HorizonNormal");
-        static readonly int sp_CrestDataSliceOffset = Shader.PropertyToID("_CrestDataSliceOffset");
-        static readonly int sp_DataSliceOffset = Shader.PropertyToID("_DataSliceOffset");
 
         CommandBuffer _underwaterEffectCommandBuffer;
         PropertyWrapperMaterial _underwaterEffectMaterial;
@@ -134,10 +131,8 @@ namespace Crest
                 underwaterPostProcessMaterial.DisableKeyword(k_KeywordDebugViewOceanMask);
             }
 
-            // We sample shadows at the camera position which will be the first slice.
-            // We also use this for caustics to get the displacement.
+            // We use this for caustics to get the displacement.
             underwaterPostProcessMaterial.SetFloat(LodDataMgr.sp_LD_SliceIndex, 0);
-            underwaterPostProcessMaterial.SetInt(sp_DataSliceOffset, dataSliceOffset);
 
             LodDataMgrAnimWaves.Bind(underwaterPostProcessMaterialWrapper);
             LodDataMgrSeaFloorDepth.Bind(underwaterPostProcessMaterialWrapper);
