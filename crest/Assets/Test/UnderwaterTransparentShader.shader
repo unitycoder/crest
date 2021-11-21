@@ -83,9 +83,9 @@ Shader "Unlit/UnderwaterTransparentShader"
 				UnityIndirect indirectLight;
 				indirectLight.diffuse = 0;
 				indirectLight.specular = 0;
-#if defined(VERTEXLIGHT_ON)
-				indirectLight.diffuse = i.vertexLightColor;
-#endif
+// #if defined(VERTEXLIGHT_ON)
+// 				indirectLight.diffuse = i.vertexLightColor;
+// #endif
 				indirectLight.diffuse += max(0, ShadeSH9(float4(i.normal, 1)));
 
 				color = UNITY_BRDF_PBS(
