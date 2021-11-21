@@ -602,35 +602,20 @@ Shader "Crest/Ocean"
 				#endif // _FLOW_ON
 				#endif // _FOAM_ON
 
-
-				half shadowScatter = shadow.x;
-#if CREST_UNDERWATER_BEFORE_TRANSPARENT
-#if _SHADOWS_ON
-				if (underwater)
-				{
-					const int sliceIndex = clamp(_CrestDataSliceOffset, 0, _SliceCount - 2);
-					const float3 uv = WorldToUV(_WorldSpaceCameraPos.xz, _CrestCascadeData[sliceIndex], sliceIndex);
-					// Camera should be at center of LOD system so no need for blending (alpha, weights, etc). This might not be
-					// the case if there is large horizontal displacement, but the _DataSliceOffset should help by setting a
-					// large enough slice as minimum.
-					shadowScatter = _LD_TexArray_Shadow.SampleLevel(LODData_linear_clamp_sampler, uv, 0.0).x;
-					shadowScatter = saturate(1.0 - shadowScatter);
-				}
-#endif // _SHADOWS_ON
-				half3 lightAmbient = underwater ? _CrestAmbientLighting : AmbientLight();
-#else // CREST_UNDERWATER_BEFORE_TRANSPARENT
-				half3 lightAmbient = AmbientLight();
-#endif // CREST_UNDERWATER_BEFORE_TRANSPARENT
-
-
 				// Compute color of ocean - in-scattered light + refracted scene
 				half3 scatterCol = ScatterColour
 				(
 					input.lodAlpha_worldXZUndisplaced_oceanDepth.w,
-					shadowScatter,
+#if defined(CREST_UNDERWATER_BEFORE_TRANSPARENT) && defined(_SHADOWS_ON)
+					underwater ? UnderwaterShadowSSS(_WorldSpaceCameraPos.xz) :
+#endif
+					shadow.x,
 					sss,
 					view,
-					lightAmbient,
+#if CREST_UNDERWATER_BEFORE_TRANSPARENT
+					underwater ? _CrestAmbientLighting :
+#endif
+					AmbientLight(),
 					lightDir,
 					lightCol,
 					underwater

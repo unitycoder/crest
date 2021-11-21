@@ -34,7 +34,6 @@ half _CrestSubSurfaceSunFallOff;
 
 half3 _CrestAmbientLighting;
 half4 _CrestDepthFogDensity;
-half _CrestDataSliceOffset;
 
 #include "../OceanConstants.hlsl"
 #include "../OceanGlobals.hlsl"
