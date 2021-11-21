@@ -99,9 +99,9 @@ Shader "Unlit/UnderwaterTransparentShader"
 				float2 screenUV = i.screenPos.xy / i.screenPos.w;
 
 				// Only apply underwater fog when underwater; otherwise, apply Unity fog.
-				if (IsUnderwater(screenUV))
+				if (CrestIsUnderwater(screenUV))
 				{
-					color.rgb = ApplyUnderwaterFog(color.rgb, i.vertex, i.worldPos);
+					color.rgb = CrestApplyUnderwaterFog(color.rgb, i.vertex, i.worldPos);
 				}
 				else
 				{

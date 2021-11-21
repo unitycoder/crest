@@ -47,9 +47,9 @@ Shader "Custom/UnderwaterSurfaceShader"
         {
             float4 positionSS = float4(IN.screenPos.xyz / IN.screenPos.w, 0.0);
 
-            if (IsUnderwater(positionSS.xy))
+            if (CrestIsUnderwater(positionSS.xy))
             {
-                color.rgb = ApplyUnderwaterFog(color.rgb, positionSS, IN.worldPos);
+                color.rgb = CrestApplyUnderwaterFog(color.rgb, positionSS, IN.worldPos);
             }
             else
             {
