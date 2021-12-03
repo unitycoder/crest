@@ -207,6 +207,16 @@ namespace Crest
         }
         FilterNoLodPreference _filterNoLodPreference = new FilterNoLodPreference();
 
+        public class FilterBeforeDynamicWaves : IDrawFilter
+        {
+            public float Filter(ILodDataInput data, out int isTransition)
+            {
+                isTransition = 0;
+                return data.Wavelength == -1 ? 1f : 0f;
+            }
+        }
+        FilterBeforeDynamicWaves _filterBeforeDynamicWaves = new FilterBeforeDynamicWaves();
+
         public override void BuildCommandBuffer(OceanRenderer ocean, CommandBuffer buf)
         {
             base.BuildCommandBuffer(ocean, buf);
@@ -239,6 +249,8 @@ namespace Crest
                 _filterWavelength._lodMinWavelength = _filterWavelength._lodMaxWavelength / 2f;
                 _filterWavelength._globalMaxWavelength = OceanRenderer.Instance._lodTransform.MaxWavelength(OceanRenderer.Instance.CurrentLodCount - 1);
                 SubmitDrawsFiltered(lodIdx, buf, _filterWavelength);
+
+                SubmitDrawsFiltered(lodIdx, buf, _filterBeforeDynamicWaves);
             }
 
             // Combine the LODs - copy results from biggest LOD down to LOD 0
