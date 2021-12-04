@@ -16,6 +16,7 @@ half WhiteFoamTexture
 	in const CascadeParams cascadeData1
 )
 {
+	i_worldXZUndisplaced -= _CrestFloatingOriginOffset.xz;
 	half ft = lerp(
 		tex2D(_FoamTexture, (1.25*i_worldXZUndisplaced + _CrestTime / 10.) / (4.*cascadeData0._texelWidth*_FoamScale)).r,
 		tex2D(_FoamTexture, (1.25*i_worldXZUndisplaced + _CrestTime / 10.) / (4.*cascadeData1._texelWidth*_FoamScale)).r,
@@ -37,6 +38,8 @@ half BubbleFoamTexture
 	in const CascadeParams cascadeData1
 )
 {
+	i_worldXZ -= _CrestFloatingOriginOffset.xz;
+	i_worldXZUndisplaced -= _CrestFloatingOriginOffset.xz;
 	float2 windDir = float2(0.866, 0.5);
 	float2 foamUVBubbles = (lerp(i_worldXZUndisplaced, i_worldXZ, 0.7) + 0.5 * _CrestTime * windDir) / _FoamScale + 0.125 * i_n.xz;
 	float2 parallaxOffset = -_FoamBubbleParallax * i_view.xz / dot(i_n, i_view);
