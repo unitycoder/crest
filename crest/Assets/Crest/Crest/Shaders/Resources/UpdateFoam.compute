@@ -38,11 +38,11 @@ void UpdateFoam(uint3 id : SV_DispatchThreadID)
 
 	const float2 input_uv = IDtoUV(id.xy, width, height);
 	const CascadeParams cascadeData = _CrestCascadeData[sliceIndex];
-	const float2 worldPosXZ = UVToWorld(input_uv, sliceIndex, cascadeData);
+	const float2 worldPosXZ = UVToWorld(input_uv, sliceIndex, cascadeData) + _CrestFloatingOriginOffset.xz;
 	const float3 uv_slice = float3(input_uv, id.z);
 
 	half2 velocity = _LD_TexArray_Flow.SampleLevel(LODData_linear_clamp_sampler, uv_slice, 0).xy;
-	const float2 worldPosXZ_flowed = worldPosXZ - _CrestFloatingOriginOffset.xz - _SimDeltaTime * velocity;
+	const float2 worldPosXZ_flowed = (worldPosXZ - _SimDeltaTime * velocity);
 
 	half foam = 0.0;
 	const half r_max = 0.5 - _CrestCascadeDataSource[sliceIndexSource]._oneOverTextureRes;

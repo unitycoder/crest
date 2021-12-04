@@ -33,6 +33,8 @@ namespace Crest
         // This is how far the simulation time is behind unity's time
         float _timeToSimulate = 0f;
 
+        Vector3 _originOffset;
+
         public int LastUpdateSubstepCount { get; private set; }
 
         public LodDataMgrPersistent(OceanRenderer ocean) : base(ocean)
@@ -190,6 +192,13 @@ namespace Crest
         /// </summary>
         protected virtual void SetAdditionalSimParams(IPropertyWrapper simMaterial)
         {
+            simMaterial.SetVector(FloatingOrigin.sp_CrestFloatingOriginOffset, _originOffset);
+            _originOffset = Vector3.zero;
+        }
+
+        public void SetOrigin(Vector3 o)
+        {
+            _originOffset = o;
         }
     }
 }

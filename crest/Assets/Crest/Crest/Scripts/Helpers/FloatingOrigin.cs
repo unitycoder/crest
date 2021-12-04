@@ -67,7 +67,7 @@ namespace Crest
 
         ParticleSystem.Particle[] _particleBuffer = null;
 
-        static readonly int sp_CrestFloatingOriginOffset = Shader.PropertyToID("_CrestFloatingOriginOffset");
+        public static readonly int sp_CrestFloatingOriginOffset = Shader.PropertyToID("_CrestFloatingOriginOffset");
 
         Vector3 _originOffset;
 
@@ -162,6 +162,9 @@ namespace Crest
             if (OceanRenderer.Instance)
             {
                 OceanRenderer.Instance._lodTransform.SetOrigin(newOrigin);
+                OceanRenderer.Instance._lodDataShadow?.SetOrigin(newOrigin);
+                OceanRenderer.Instance._lodDataFoam?.SetOrigin(newOrigin);
+                OceanRenderer.Instance._lodDataDynWaves?.SetOrigin(newOrigin);
 
                 Shader.SetGlobalVector(sp_CrestFloatingOriginOffset, _originOffset - newOrigin);
                 _originOffset -= newOrigin;

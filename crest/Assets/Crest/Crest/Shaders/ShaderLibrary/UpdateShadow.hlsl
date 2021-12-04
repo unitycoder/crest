@@ -93,7 +93,7 @@ half2 Frag(Varyings input) : SV_Target
 	{
 		const int slice0 = _LD_SliceIndex + _CrestLodChange;
 		const CascadeParams cascadeData = _CrestCascadeDataSource[slice0];
-		const float3 uv = WorldToUV(positionWS.xz, cascadeData, slice0);
+		const float3 uv = WorldToUV(positionWS.xz + _CrestFloatingOriginOffset.xz, cascadeData, slice0);
 		float depth;
 		{
 			float width; float height;
