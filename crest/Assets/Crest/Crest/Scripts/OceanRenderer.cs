@@ -108,7 +108,7 @@ namespace Crest
         }
 
         [Tooltip("The height where detail is focused is smoothed to avoid popping which is undesireable after a teleport. Threshold is in Unity units."), SerializeField]
-        float _teleportThreshold = 5.0f;
+        float _teleportThreshold = 10f;
         float _teleportTimer;
         Vector3 _oldViewerPosition;
 
