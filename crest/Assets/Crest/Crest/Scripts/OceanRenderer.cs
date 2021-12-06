@@ -107,6 +107,11 @@ namespace Crest
             }
         }
 
+        [Tooltip("The height where detail is focused is smoothed to avoid popping which is undesireable after a teleport. Threshold is in Unity units."), SerializeField]
+        float _teleportThreshold = 5.0f;
+        float _teleportTimer;
+        Vector3 _oldViewerPosition;
+
         public Transform Root { get; private set; }
 
         // does not respond to _timeProvider changing in inspector
@@ -1081,9 +1086,33 @@ namespace Crest
 
             ViewerHeightAboveWater = camera.transform.position.y - waterHeight;
 
+            // Calculate teleport distance and create window for height queries to return a height change.
+            {
+                if (_teleportTimer > 0f)
+                {
+                    _teleportTimer -= Time.deltaTime;
+                }
+
+                var teleportDistance = (_oldViewerPosition - camera.transform.position).sqrMagnitude;
+                var teleportDistanceFloatingOrigin = FloatingOrigin.TeleportOriginThisFrame.sqrMagnitude;
+                var threshold = Mathf.Pow(_teleportThreshold, 2f) + teleportDistanceFloatingOrigin;
+                var isFloatingOriginTeleport = Mathf.Approximately(teleportDistance, 0f) && teleportDistanceFloatingOrigin > 0f;
+
+                // Ignore pure FO teleports as it is effectively the same world position.
+                if (teleportDistance > threshold || isFloatingOriginTeleport)
+                {
+                    // Height queries can take a few frames so a one second window should be plenty.
+                    _teleportTimer = 1f;
+                }
+
+                _oldViewerPosition = camera.transform.position;
+            }
+
             // Smoothly varying version of viewer height to combat sudden changes in water level that are possible
             // when there are local bodies of water
-            _viewerHeightAboveWaterSmooth = Mathf.Lerp(_viewerHeightAboveWaterSmooth, ViewerHeightAboveWater, 0.05f);
+            _viewerHeightAboveWaterSmooth = _teleportTimer > 0f
+                ? ViewerHeightAboveWater
+                : Mathf.Lerp(_viewerHeightAboveWaterSmooth, ViewerHeightAboveWater, 0.05f);
         }
 
         void LateUpdateLods()
