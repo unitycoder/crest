@@ -1093,13 +1093,12 @@ namespace Crest
                     _teleportTimer -= Time.deltaTime;
                 }
 
-                var teleportDistance = (_oldViewerPosition - camera.transform.position).sqrMagnitude;
-                var teleportDistanceFloatingOrigin = FloatingOrigin.TeleportOriginThisFrame.sqrMagnitude;
-                var threshold = Mathf.Pow(_teleportThreshold, 2f) + teleportDistanceFloatingOrigin;
-                var isFloatingOriginTeleport = Mathf.Approximately(teleportDistance, 0f) && teleportDistanceFloatingOrigin > 0f;
+                // Find the distance. Adding the FO offset will exclude FO teleports from the distance.
+                var teleportDistance = (_oldViewerPosition - camera.transform.position - FloatingOrigin.TeleportOriginThisFrame).sqrMagnitude;
+                // Threshold as sqrMagnitude.
+                var threshold = Mathf.Pow(_teleportThreshold, 2f);
 
-                // Ignore pure FO teleports as it is effectively the same world position.
-                if (teleportDistance > threshold || isFloatingOriginTeleport)
+                if (teleportDistance > threshold)
                 {
                     // Height queries can take a few frames so a one second window should be plenty.
                     _teleportTimer = 1f;
