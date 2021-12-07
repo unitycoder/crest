@@ -1093,7 +1093,8 @@ namespace Crest
                     _teleportTimer -= Time.deltaTime;
                 }
 
-                // Find the distance. Adding the FO offset will exclude FO teleports from the distance.
+                // Find the distance. Adding the FO offset will exclude FO shifts. FO shifts are visually the same world
+                // position and it would be incorrect to treat it as a normal teleport.
                 var teleportDistance = (_oldViewerPosition - camera.transform.position - FloatingOrigin.TeleportOriginThisFrame).sqrMagnitude;
                 // Threshold as sqrMagnitude.
                 var threshold = Mathf.Pow(_teleportThreshold, 2f);
